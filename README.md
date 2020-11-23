@@ -1,5 +1,5 @@
-## Mongodb
-### Проект для изучения mongodb
+## Авторизация и аутенфикация
+### Проект для практики в аутенфикации и авторизации
 ## Инструкция по сборке проекта | Project building instruction
 ### Команда для установки всех зависимостей | Command to install all dependencies :
 #### npm install
