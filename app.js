@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const router = require('./routes/user');
 const routerCards = require('./routes/card');
+const auth = require('./middlewares/auth');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -22,13 +23,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   // eslint-disable-next-line no-console
   .catch((err) => console.log(err));
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '5faeb9960acaf6063285dc8f',
-  };
-  next();
-});
-app.use('/cards', routerCards);
+app.use('/cards', auth, routerCards);
 app.use('/users', router);
 
 app.listen(PORT, () => {

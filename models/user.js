@@ -24,6 +24,17 @@ const User = mongoose.Schema({
       require_protocol: true,
     }),
   },
+  email: {
+    type: String,
+    required: true,
+    validate: (value) => validator.isEmail(value, {
+      message: 'Ваша почта не валидна',
+    }),
+  },
+  password: {
+    type: String,
+    required: true,
+  },
 });
 
 module.exports = mongoose.model('user', User);
