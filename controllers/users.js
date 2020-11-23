@@ -1,7 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { isIterable } = require('core-js');
 const jwt = require('jsonwebtoken');
-const user = require('../models/user');
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
@@ -58,7 +56,7 @@ module.exports.createUser = (req, res) => {
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
-  User.findOne({ email })
+  User.findOne({ email }).select('+password')
     // eslint-disable-next-line consistent-return
     .then((user) => {
       if (!user) {
@@ -71,8 +69,9 @@ module.exports.login = (req, res) => {
         res.status(401).send({ message: 'Неправильные пароль или почта' });
       }
       const token = jwt.sign({
+        // eslint-disable-next-line no-undef
         _id: user._id,
-      }, 'secret-key');
+      }, 'secret-key', { expiresIn: '7d' });
       return res.status(201).send({ token });
     })
     .catch((err) => {
