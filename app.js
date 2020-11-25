@@ -5,8 +5,7 @@ const app = express();
 const mongoose = require('mongoose');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const bodyParser = require('body-parser');
-const router = require('./routes/user');
-const routerCards = require('./routes/card');
+const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 
 app.use(bodyParser.json());
@@ -23,8 +22,13 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   // eslint-disable-next-line no-console
   .catch((err) => console.log(err));
 
-app.use('/cards', auth, routerCards);
-app.use('/users', router);
+app.post('/signin', login);
+app.post('/signup', createUser);
+
+app.use(auth);
+
+app.use('/cards', require('./routes/card'));
+app.use('/users', require('./routes/user'));
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

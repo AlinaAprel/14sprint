@@ -1,9 +1,7 @@
 const mongoose = require('mongoose');
-// eslint-disable-next-line import/no-extraneous-dependencies
-const { ObjectId } = require('bson');
 const validator = require('validator');
 
-const Card = mongoose.Schema({
+const card = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -13,25 +11,27 @@ const Card = mongoose.Schema({
   link: {
     type: String,
     required: true,
-    validate: (value) => validator.isURL(value, {
-      message: 'Ваша ссылка не валидна',
-      protocols: ['http', 'https', 'ftp'],
-      require_tld: true,
-      require_protocol: true,
-    }),
+    validate: {
+      validator(link) {
+        return validator.isURL(link);
+      },
+      message: 'Некорректная ссылка',
+    },
   },
   owner: {
-    type: ObjectId,
+    type: mongoose.Types.ObjectId,
+    ref: 'user',
     required: true,
   },
-  likes: {
-    type: ObjectId,
-    default: null,
-  },
-  createdAd: {
+  likes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
+    default: [],
+  }],
+  createdAt: {
     type: Date,
     default: Date.now,
   },
 });
 
-module.exports = mongoose.model('card', Card);
+module.exports = mongoose.model('card', card);

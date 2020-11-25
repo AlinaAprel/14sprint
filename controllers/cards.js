@@ -7,13 +7,12 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.createCard = (req, res) => {
-  const userIdForCard = req.user._id;
-  const { name, link } = req.body;
-  Card.create({ name, link, owner: userIdForCard })
+  const { name, link, owner } = req.body;
+  Card.create({ name, link, owner })
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        res.status(401).send({ message: 'Переданы некорректные данные' });
       } else {
         res.status(500).send({ message: 'Ошибка при создании карточки' });
       }
@@ -23,7 +22,12 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .orFail(new Error('NotFound', 'CastError'))
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => {
+      if (req.user._id !== card.owner._id.toString()) {
+        res.status(403).send({ message: 'Вы не можете удалять чужие карточки' });
+      }
+      res.status(200).send({ message: 'Карточка удалена!' });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });

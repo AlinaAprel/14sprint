@@ -35,19 +35,35 @@ module.exports.getUserId = (req, res) => {
 };
 // eslint-disable-next-line max-len
 
+// eslint-disable-next-line consistent-return
 module.exports.createUser = (req, res) => {
-  bcrypt.hash(req.body.password, 10)
-    .then((hash) => User.create({
-      name: req.body.name,
-      about: req.body.about,
-      avatar: req.body.avatar,
-      email: req.body.email,
-      password: hash,
-    }))
-    .then((user) => res.send({ data: user }))
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  const userpassword = password.replace(/\s/g, '');
+
+  if (userpassword.length < 6) {
+    return res.status(400).send({ message: 'Пароль меньше 6 символов' });
+  }
+
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      User.create({
+        name, about, avatar, email, password: hash,
+      });
+    })
+    .then(() => {
+      res.status(201).send({
+        data: {
+          name, about, avatar, email,
+        },
+      });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: `Переданы некорректные данные ${err}` });
+      } else if (err.name === 'MongoError' && err.code === 11000) {
+        res.status(409).send({ message: 'Пользователь уже зарегистрирован' });
       } else {
         res.status(500).send({ message: 'Ошибка при создании user' });
       }
@@ -69,8 +85,7 @@ module.exports.login = (req, res) => {
         res.status(401).send({ message: 'Неправильные пароль или почта' });
       }
       const token = jwt.sign({
-        // eslint-disable-next-line no-undef
-        _id: user._id,
+        _id: User._id,
       }, 'secret-key', { expiresIn: '7d' });
       return res.status(201).send({ token });
     })

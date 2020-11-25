@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
-const User = mongoose.Schema({
+const User = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -17,23 +17,28 @@ const User = mongoose.Schema({
   avatar: {
     type: String,
     required: true,
-    validate: (value) => validator.isURL(value, {
-      message: 'Ваша ссылка не валидна',
-      protocols: ['http', 'https', 'ftp'],
-      require_tld: true,
-      require_protocol: true,
-    }),
+    validate: {
+      validator(link) {
+        return validator.isURL(link);
+      },
+      message: 'Некорректная ссылка',
+    },
   },
   email: {
     type: String,
     required: true,
-    validate: (value) => validator.isEmail(value, {
-      message: 'Ваша почта не валидна',
-    }),
+    validate: {
+      validator(link) {
+        return validator.isEmail(link);
+      },
+      message: 'Некорректный Email',
+    },
+    unique: true,
   },
   password: {
     type: String,
     required: true,
+    minlength: 8,
     select: false,
   },
 });
