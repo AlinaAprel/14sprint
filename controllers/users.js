@@ -33,13 +33,12 @@ module.exports.getUserId = (req, res) => {
       }
     });
 };
-// eslint-disable-next-line max-len
-
 // eslint-disable-next-line consistent-return
 module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
+
   const userpassword = password.replace(/\s/g, '');
 
   if (userpassword.length < 6) {
@@ -47,13 +46,14 @@ module.exports.createUser = (req, res) => {
   }
 
   bcrypt.hash(password, 10)
+    // eslint-disable-next-line arrow-body-style
     .then((hash) => {
-      User.create({
+      return User.create({
         name, about, avatar, email, password: hash,
       });
     })
     .then(() => {
-      res.status(201).send({
+      res.status(200).send({
         data: {
           name, about, avatar, email,
         },
